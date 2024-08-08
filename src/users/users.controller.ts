@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from '../auth/dto/register.dto';
+import { UpdateUserDto } from 'src/auth/dto/update.dto';
 
 @Controller('users')
 export class UsersController {
@@ -31,15 +32,13 @@ export class UsersController {
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
-    @Body() updateUserDto: CreateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const user = await this.usersService.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     user.name = updateUserDto.name;
-    user.email = updateUserDto.email;
-    user.password = updateUserDto.password;
     return this.usersService.updateUser(user);
   }
 }

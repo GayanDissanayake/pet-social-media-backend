@@ -4,6 +4,9 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
+import * as nodemailer from 'nodemailer';
+
 // import { UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
@@ -43,15 +46,50 @@ export class AuthService {
       createUserDto.email,
       hashedPassword,
     );
+    // Generate email verification token
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await this.usersService.updateUser(user);
+
+    // Send verification email
+    await this.sendVerificationEmail(user.email, verificationToken);
     return user;
   }
 
+  private async sendVerificationEmail(email: string, token: string) {
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: 'gayansasankadissanayake@gmail.com',
+      to: email,
+      subject: 'Email Verification',
+      text: `Please verify your email by clicking on the following link: 
+             ${process.env.FRONTEND_URL}/verify/${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
   async verifyEmail(token: string): Promise<void> {
-    const user = await this.usersService.findById(token);
+    const user = await this.usersService.findByEmailVerificationToken(token);
     if (!user) {
-      throw new UnauthorizedException();
+      console.log('User not found');
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+    if (user.emailVerificationExpires.getTime() < Date.now()) {
+      console.log('Token expired');
+      throw new UnauthorizedException('Invalid or expired token');
     }
     user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
     await this.usersService.updateUser(user);
   }
 }

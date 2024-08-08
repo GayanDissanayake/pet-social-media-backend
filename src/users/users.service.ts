@@ -48,4 +48,15 @@ export class UsersService {
       })
       .exec();
   }
+
+  async findByEmailVerificationToken(
+    token: string,
+  ): Promise<UserDocument | undefined> {
+    return this.userModel
+      .findOne({
+        emailVerificationToken: token,
+        emailVerificationExpires: { $gt: Date.now() },
+      })
+      .exec();
+  }
 }

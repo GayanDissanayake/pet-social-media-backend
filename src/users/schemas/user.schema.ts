@@ -25,6 +25,12 @@ export class User {
 
   @Prop()
   googleId?: string;
+
+  @Prop()
+  emailVerificationToken?: string;
+
+  @Prop()
+  emailVerificationExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
