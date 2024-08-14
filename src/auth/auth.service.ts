@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
+import { User } from 'src/users/schemas/user.schema';
 
 // import { UserDocument } from '../users/schemas/user.schema';
 
@@ -53,11 +54,11 @@ export class AuthService {
     await this.usersService.updateUser(user);
 
     // Send verification email
-    await this.sendVerificationEmail(user.email, verificationToken);
+    await this.sendVerificationEmail(user, verificationToken);
     return user;
   }
 
-  private async sendVerificationEmail(email: string, token: string) {
+  private async sendVerificationEmail(user: User, token: string) {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
@@ -68,28 +69,38 @@ export class AuthService {
 
     const mailOptions = {
       from: 'gayansasankadissanayake@gmail.com',
-      to: email,
+      to: user.email,
       subject: 'Email Verification',
       text: `Please verify your email by clicking on the following link: 
-             ${process.env.FRONTEND_URL}/verify/${token}`,
+             ${process.env.FRONTEND_URL}/verify?email=${user.email}&token=${token}`,
     };
 
     await transporter.sendMail(mailOptions);
   }
 
-  async verifyEmail(token: string): Promise<void> {
-    const user = await this.usersService.findByEmailVerificationToken(token);
+  async verifyEmail(email: string, token: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       console.log('User not found');
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException('User not found');
+    }
+    if (user.emailVerificationToken === null) {
+      console.log('User already verified');
+      throw new UnauthorizedException('User already verified');
     }
     if (user.emailVerificationExpires.getTime() < Date.now()) {
       console.log('Token expired');
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException('expired token');
     }
+    if (user.emailVerificationToken !== token) {
+      console.log('Invalid token');
+      throw new UnauthorizedException('Invalid token');
+    }
+
     user.emailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
+    user.emailVerificationToken = null;
+    user.emailVerificationExpires = null;
+
     await this.usersService.updateUser(user);
   }
 }

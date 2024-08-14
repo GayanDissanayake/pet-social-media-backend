@@ -39,8 +39,12 @@ export class AuthController {
     return req.user;
   }
 
-  @Get('verify/:token')
-  async verifyEmail(@Param('token') token: string) {
-    return this.authService.verifyEmail(token);
+  @Get('verify/:email/:token')
+  async verifyEmail(
+    @Param('email') email: string,
+    @Param('token') token: string,
+  ) {
+    await this.authService.verifyEmail(email, token);
+    return { message: 'Email verified successfully!' };
   }
 }
