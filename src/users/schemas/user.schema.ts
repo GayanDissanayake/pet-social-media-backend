@@ -18,10 +18,10 @@ export class User {
   emailVerified: boolean;
 
   @Prop()
-  resetPasswordToken?: string;
+  passwordResetToken?: string;
 
   @Prop()
-  resetPasswordExpires?: Date;
+  passwordResetExpires?: Date;
 
   @Prop()
   googleId?: string;

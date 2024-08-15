@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateUserDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from '../users/users.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 // import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -44,7 +45,16 @@ export class AuthController {
     @Param('email') email: string,
     @Param('token') token: string,
   ) {
-    await this.authService.verifyEmail(email, token);
-    return { message: 'Email verified successfully!' };
+    return this.authService.verifyEmail(email, token);
+  }
+
+  @Post('request-password-reset')
+  async requestPasswordReset(@Body('email') email: string) {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

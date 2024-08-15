@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dto/register.dto';
@@ -7,6 +12,7 @@ import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { User } from 'src/users/schemas/user.schema';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 // import { UserDocument } from '../users/schemas/user.schema';
 
@@ -78,7 +84,10 @@ export class AuthService {
     await transporter.sendMail(mailOptions);
   }
 
-  async verifyEmail(email: string, token: string): Promise<void> {
+  async verifyEmail(
+    email: string,
+    token: string,
+  ): Promise<{ message: string }> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       console.log('User not found');
@@ -86,7 +95,7 @@ export class AuthService {
     }
     if (user.emailVerificationToken === null) {
       console.log('User already verified');
-      throw new UnauthorizedException('User already verified');
+      return { message: 'Email is already verified!' };
     }
     if (user.emailVerificationExpires.getTime() < Date.now()) {
       console.log('Token expired');
@@ -96,11 +105,72 @@ export class AuthService {
       console.log('Invalid token');
       throw new UnauthorizedException('Invalid token');
     }
-
     user.emailVerified = true;
     user.emailVerificationToken = null;
     user.emailVerificationExpires = null;
-
     await this.usersService.updateUser(user);
+    return { message: 'Email verified successfully!' };
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Generate password reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // Token valid for 1 hour
+    await this.usersService.updateUser(user);
+
+    // Send password reset email
+    await this.sendPasswordResetEmail(user, resetToken);
+    return { message: 'Password reset email sent' };
+  }
+
+  private async sendPasswordResetEmail(user: User, token: string) {
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: 'gayansasankadissanayake@gmail.com',
+      to: user.email,
+      subject: 'Password Reset',
+      text: `You requested a password reset. Please click on the following link to reset your password: 
+             ${process.env.FRONTEND_URL}/reset-password?token=${token}&email=${user.email}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, token, newPassword } = resetPasswordDto;
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (
+      !user.passwordResetToken ||
+      user.passwordResetExpires.getTime() < Date.now()
+    ) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+    if (user.passwordResetToken !== token) {
+      throw new UnauthorizedException('Invalid password reset token');
+    }
+
+    // Reset password
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await this.usersService.updateUser(user);
+
+    return { message: 'Password reset successfully' };
   }
 }

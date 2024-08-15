@@ -33,8 +33,8 @@ export class UsersService {
     token: string,
     expires: Date,
   ): Promise<void> {
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = expires;
+    user.passwordResetToken = token;
+    user.passwordResetExpires = expires;
     await user.save();
   }
 
