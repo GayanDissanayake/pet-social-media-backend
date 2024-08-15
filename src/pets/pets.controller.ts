@@ -1,42 +1,40 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Param,
+  Get,
+  Patch,
   Delete,
-  Put,
 } from '@nestjs/common';
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
-import { UpdatePetDto } from './dto/update-pet.dto';
+import { Pet } from './schemas/pet.schema';
 
 @Controller('pets')
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
   @Post()
-  create(@Body() createPetDto: CreatePetDto) {
+  async create(@Body() createPetDto: CreatePetDto): Promise<Pet> {
     return this.petsService.create(createPetDto);
   }
 
-  @Get()
-  findAll() {
-    return this.petsService.findAll();
+  @Get(':owner_id')
+  async findByOwnerId(@Param('owner_id') owner_id: string): Promise<Pet[]> {
+    return this.petsService.findByOwnerId(owner_id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.petsService.findOne(id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto) {
-    return this.petsService.update(id, updatePetDto);
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() createPetDto: CreatePetDto,
+  ): Promise<Pet> {
+    return this.petsService.update(id, createPetDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.petsService.remove(id);
+  async delete(@Param('id') id: string): Promise<Pet> {
+    return this.petsService.delete(id);
   }
 }

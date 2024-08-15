@@ -3,8 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { PetsModule } from './pets/pets.module';
 import { HealthModule } from './health/health.module';
+import { PetsModule } from './pets/pets.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { HealthModule } from './health/health.module';
     AuthModule,
     UsersModule,
     PetsModule,
+    PostsModule,
     HealthModule,
   ],
 })
