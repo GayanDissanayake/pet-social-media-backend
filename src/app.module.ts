@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
 import { PetsModule } from './pets/pets.module';
 import { PostsModule } from './posts/posts.module';
+import { LikesModule } from './likes/likes.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { PostsModule } from './posts/posts.module';
     UsersModule,
     PetsModule,
     PostsModule,
+    LikesModule,
+    CommentsModule,
     HealthModule,
   ],
 })
