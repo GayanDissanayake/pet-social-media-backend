@@ -13,6 +13,10 @@ export class PetsService {
     return newPet.save();
   }
 
+  async findAll(): Promise<Pet[]> {
+    return this.petModel.find().exec();
+  }
+
   async findByOwnerId(owner_id: string): Promise<Pet[]> {
     return this.petModel.find({ owner_id }).exec();
   }

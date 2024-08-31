@@ -20,6 +20,11 @@ export class PetsController {
     return this.petsService.create(createPetDto);
   }
 
+  @Get()
+  async findAll(): Promise<Pet[]> {
+    return this.petsService.findAll();
+  }
+
   @Get(':owner_id')
   async findByOwnerId(@Param('owner_id') owner_id: string): Promise<Pet[]> {
     return this.petsService.findByOwnerId(owner_id);
