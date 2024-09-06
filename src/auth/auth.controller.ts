@@ -34,6 +34,14 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('google')
+  async googleLogin(
+    @Body() userData: { email: string; name: string; token: string },
+  ) {
+    // Call the AuthService to handle Google login or registration
+    return this.authService.googleLogin(userData);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {

@@ -49,6 +49,38 @@ export class AuthService {
     };
   }
 
+  async googleLogin(userData: { email: string; name: string; token: string }) {
+    // Validate Google token (you can validate the token with Google's API if needed)
+    const decodedToken = this.jwtService.decode(userData.token);
+
+    if (!decodedToken || decodedToken.email !== userData.email) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+
+    // Check if user already exists
+    let user = await this.usersService.findByEmail(userData.email);
+
+    // If user doesn't exist, register them
+    if (!user) {
+      user = await this.usersService.createUser(
+        userData.name,
+        userData.email,
+        null,
+      );
+    }
+
+    // Generate a new JWT token for your app (not Google token)
+    const payload = { email: user.email, sub: user._id };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      token,
+      email: user.email,
+      name: user.name,
+      id: user._id,
+    };
+  }
+
   async register(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = await this.usersService.createUser(

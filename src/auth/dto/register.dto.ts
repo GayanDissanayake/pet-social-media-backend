@@ -9,7 +9,7 @@ export class CreateUserDto {
   @IsEmail()
   readonly email: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @MinLength(6)
   readonly password: string;
 }

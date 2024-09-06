@@ -10,7 +10,7 @@ export class UsersService {
   async createUser(
     name: string,
     email: string,
-    password: string,
+    password?: string,
   ): Promise<UserDocument> {
     const user = new this.userModel({ name, email, password });
     return user.save();
