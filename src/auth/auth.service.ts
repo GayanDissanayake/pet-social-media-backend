@@ -4,8 +4,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import axios from 'axios';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { AuthResponse, UsersService } from '../users/users.service';
 import { CreateUserDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
@@ -15,6 +16,23 @@ import { User } from 'src/users/schemas/user.schema';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 // import { UserDocument } from '../users/schemas/user.schema';
+
+interface FacebookTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+interface FacebookUserProfile {
+  id: string;
+  name: string;
+  email: string;
+  picture: {
+    data: {
+      url: string;
+    };
+  };
+}
 
 @Injectable()
 export class AuthService {
@@ -79,6 +97,58 @@ export class AuthService {
       name: user.name,
       id: user._id,
     };
+  }
+
+  async facebookLogin(code: string): Promise<AuthResponse> {
+    const clientId = process.env.FACEBOOK_APP_ID;
+    const clientSecret = process.env.FACEBOOK_APP_SECRET;
+    const redirectUri = process.env.FACEBOOK_REDIRECT_URI;
+
+    // Exchange the authorization code for an access token
+    const tokenResponse = await axios.get<FacebookTokenResponse>(
+      `https://graph.facebook.com/v16.0/oauth/access_token`,
+      {
+        params: {
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: redirectUri,
+          code,
+        },
+      },
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // Fetch the user profile using the access token
+    const userProfile = await this.getFacebookUserProfile(accessToken);
+
+    // Find or create the user in the database
+    const user = await this.usersService.findOrCreateUser(
+      userProfile.id,
+      userProfile.name,
+      userProfile.email,
+    );
+
+    // Generate a JWT token
+    const payload = { userId: user._id }; // Use _id for MongoDB
+    const token = this.jwtService.sign(payload);
+
+    return { user, token };
+  }
+
+  async getFacebookUserProfile(
+    accessToken: string,
+  ): Promise<FacebookUserProfile> {
+    const profileResponse = await axios.get('https://graph.facebook.com/me', {
+      params: {
+        fields: 'id,name,email,picture',
+        access_token: accessToken,
+      },
+    });
+
+    const profile = profileResponse.data as FacebookUserProfile;
+
+    return profile;
   }
 
   async register(createUserDto: CreateUserDto) {

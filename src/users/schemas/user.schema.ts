@@ -12,10 +12,10 @@ export class User {
   email: string;
 
   @Prop()
-  password: string;
+  password?: string;
 
   @Prop({ default: false })
-  emailVerified: boolean;
+  emailVerified?: boolean;
 
   @Prop()
   passwordResetToken?: string;
@@ -25,6 +25,9 @@ export class User {
 
   @Prop()
   googleId?: string;
+
+  @Prop()
+  facebookId?: string;
 
   @Prop()
   emailVerificationToken?: string;

@@ -3,6 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 
+export interface AuthResponse {
+  user: UserDocument;
+  token: string;
+}
+
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
@@ -14,6 +19,21 @@ export class UsersService {
   ): Promise<UserDocument> {
     const user = new this.userModel({ name, email, password });
     return user.save();
+  }
+
+  async findOrCreateUser(
+    facebookId: string,
+    name: string,
+    email: string,
+  ): Promise<UserDocument> {
+    let user = await this.userModel.findOne({ facebookId }).exec();
+
+    if (!user) {
+      user = new this.userModel({ facebookId, name, email });
+      await user.save();
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<UserDocument | undefined> {
