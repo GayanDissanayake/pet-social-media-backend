@@ -20,6 +20,11 @@ export class PetsController {
     return this.petsService.create(createPetDto);
   }
 
+  @Get('pet/:id')
+  async findOne(@Param('id') id: string): Promise<Pet> {
+    return this.petsService.findOne(id);
+  }
+
   @Get()
   async findAll(): Promise<Pet[]> {
     return this.petsService.findAll();

@@ -13,6 +13,14 @@ export class PetsService {
     return newPet.save();
   }
 
+  async findOne(id: string): Promise<Pet> {
+    const pet = await this.petModel.findById(id).exec();
+    if (!pet) {
+      throw new NotFoundException(`Pet #${id} not found`);
+    }
+    return pet;
+  }
+
   async findAll(): Promise<Pet[]> {
     return this.petModel.find().exec();
   }

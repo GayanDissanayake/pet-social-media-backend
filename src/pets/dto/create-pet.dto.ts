@@ -26,6 +26,10 @@ export class CreatePetDto {
   description: string;
 
   @IsOptional()
+  @IsString()
+  shortDescription: string;
+
+  @IsOptional()
   certifications: string[];
 
   @IsOptional()
@@ -38,5 +42,5 @@ export class CreatePetDto {
 
   @IsOptional()
   @IsString()
-  image: string;
+  image?: string;
 }

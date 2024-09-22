@@ -22,6 +22,9 @@ export class Pet extends Document {
   description: string;
 
   @Prop()
+  shortDescription: string;
+
+  @Prop()
   certifications: string[];
 
   @Prop()
