@@ -43,4 +43,7 @@ export class CreatePetDto {
   @IsOptional()
   @IsString()
   image?: string;
+
+  @IsOptional()
+  updated_at: Date;
 }

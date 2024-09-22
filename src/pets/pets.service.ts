@@ -30,6 +30,7 @@ export class PetsService {
   }
 
   async update(id: string, createPetDto: CreatePetDto): Promise<Pet> {
+    createPetDto.updated_at = new Date();
     const existingPet = await this.petModel.findByIdAndUpdate(
       id,
       createPetDto,
