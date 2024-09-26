@@ -41,4 +41,10 @@ export class UsersController {
     user.name = updateUserDto.name;
     return this.usersService.updateUser(user);
   }
+
+  // @UseGuards(JwtAuthGuard)
+  @Get()
+  async getAllUsers() {
+    return this.usersService.getAllUsers();
+  }
 }

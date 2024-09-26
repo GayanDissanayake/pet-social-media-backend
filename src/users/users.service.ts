@@ -79,4 +79,8 @@ export class UsersService {
       })
       .exec();
   }
+
+  async getAllUsers(): Promise<User[]> {
+    return this.userModel.find();
+  }
 }
