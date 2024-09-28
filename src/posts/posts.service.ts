@@ -14,11 +14,11 @@ export class PostsService {
   }
 
   async findAll(): Promise<Post[]> {
-    return this.postModel.find().exec();
+    return this.postModel.find().sort({ created_at: -1 }).exec();
   }
 
   async findByUserId(user_id: string): Promise<Post[]> {
-    return this.postModel.find({ user_id }).exec();
+    return this.postModel.find({ user_id }).sort({ created_at: -1 }).exec();
   }
 
   async update(id: string, createPostDto: CreatePostDto): Promise<Post> {
