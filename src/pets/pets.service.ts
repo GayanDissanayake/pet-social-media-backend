@@ -22,11 +22,11 @@ export class PetsService {
   }
 
   async findAll(): Promise<Pet[]> {
-    return this.petModel.find().exec();
+    return this.petModel.find().sort({ created_at: -1 }).exec();
   }
 
   async findByOwnerId(owner_id: string): Promise<Pet[]> {
-    return this.petModel.find({ owner_id }).exec();
+    return this.petModel.find({ owner_id }).sort({ created_at: -1 }).exec();
   }
 
   async update(id: string, createPetDto: CreatePetDto): Promise<Pet> {
