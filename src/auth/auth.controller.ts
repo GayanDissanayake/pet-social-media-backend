@@ -63,16 +63,23 @@ export class AuthController {
     @Res() res: Response,
   ) {
     try {
-      const { user, token } = await this.authService.facebookLogin(code);
-      console.log(user);
+      const authResponse = await this.authService.facebookLogin(code);
+
+      // If the response has a redirect property, redirect the user
+      if ('redirect' in authResponse) {
+        // Include a query parameter indicating the user already exists
+        return res.redirect(`${authResponse.redirect}?error=user_exists`);
+      }
+
+      const { user, token } = authResponse;
+
       // Set the JWT token as an HTTP-only cookie
       res.cookie('authToken', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Set to true if using HTTPS
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
-      // Redirect to the frontend with user details and token as query parameters
       res.redirect(
         `http://localhost:3000/facebook?token=${token}&name=${user.name}&email=${user.email}`,
       );
