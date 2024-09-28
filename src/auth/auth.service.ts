@@ -99,7 +99,9 @@ export class AuthService {
     };
   }
 
-  async facebookLogin(code: string): Promise<AuthResponse> {
+  async facebookLogin(
+    code: string,
+  ): Promise<AuthResponse | { redirect: string }> {
     const clientId = process.env.FACEBOOK_APP_ID;
     const clientSecret = process.env.FACEBOOK_APP_SECRET;
     const redirectUri = process.env.FACEBOOK_REDIRECT_URI;
@@ -121,6 +123,15 @@ export class AuthService {
 
     // Fetch the user profile using the access token
     const userProfile = await this.getFacebookUserProfile(accessToken);
+
+    // Check if the user already exists
+
+    const existingUser = await this.usersService.findByEmail(userProfile.email);
+    console.log(existingUser);
+    if (existingUser) {
+      // Redirect to the login page if the user already exists
+      return { redirect: 'http://localhost:3000/auth/login' };
+    }
 
     // Find or create the user in the database
     const user = await this.usersService.findOrCreateUser(

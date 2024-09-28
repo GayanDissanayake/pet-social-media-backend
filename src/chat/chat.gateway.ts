@@ -41,7 +41,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     payload: { receiverId: string; senderId: string; message: string },
   ) {
     // Save message to the database first
-    console.log('Saving message to the database...');
     const savedMessage = await this.chatService.saveMessage(
       payload.senderId,
       payload.receiverId,
