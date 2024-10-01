@@ -29,6 +29,11 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
+  @Get('user/:id')
+  async findById(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,

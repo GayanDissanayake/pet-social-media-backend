@@ -20,6 +20,11 @@ export class PostsController {
     return this.postsService.create(createPostDto);
   }
 
+  @Get('post/:id')
+  async findOne(@Param('id') id: string): Promise<PostEntity> {
+    return this.postsService.findOne(id);
+  }
+
   @Get()
   async findAll(): Promise<PostEntity[]> {
     return this.postsService.findAll();

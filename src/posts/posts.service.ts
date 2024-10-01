@@ -13,6 +13,14 @@ export class PostsService {
     return newPost.save();
   }
 
+  async findOne(id: string): Promise<Post> {
+    const post = await this.postModel.findById(id).exec();
+    if (!post) {
+      throw new NotFoundException(`Post #${id} not found`);
+    }
+    return post;
+  }
+
   async findAll(): Promise<Post[]> {
     return this.postModel.find().sort({ created_at: -1 }).exec();
   }

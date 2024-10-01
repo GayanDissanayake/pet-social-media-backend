@@ -12,4 +12,7 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   image: string;
+
+  @IsOptional()
+  updated_at: Date;
 }
