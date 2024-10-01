@@ -127,7 +127,6 @@ export class AuthService {
     // Check if the user already exists
 
     const existingUser = await this.usersService.findByEmail(userProfile.email);
-    console.log(existingUser);
     if (existingUser) {
       // Redirect to the login page if the user already exists
       return { redirect: 'http://localhost:3000/auth/login' };
