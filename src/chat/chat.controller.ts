@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { ChatMessage } from './schemas/chat.schema'; // Use the correct schema path
 
@@ -19,5 +19,19 @@ export class ChatController {
     @Param('receiver') receiver: string,
   ): Promise<ChatMessage[]> {
     return this.chatService.getMessagesBetweenUsers(sender, receiver);
+  }
+
+  @Get('/chat-users/:userId')
+  async getChatUsersForUser(
+    @Param('userId') userId: string,
+  ): Promise<string[]> {
+    if (!userId) {
+      throw new NotFoundException('User ID is required');
+    }
+    const chatUsers = await this.chatService.getChatUsersForUser(userId);
+    if (!chatUsers) {
+      throw new NotFoundException('No chat users found for the given user ID');
+    }
+    return chatUsers;
   }
 }

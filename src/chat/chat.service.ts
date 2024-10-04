@@ -36,4 +36,20 @@ export class ChatService {
       .sort({ timestamp: 1 })
       .exec(); // Sorting by timestamp to ensure order
   }
+
+  async getChatUsersForUser(userId: string): Promise<string[]> {
+    const messages = await this.chatMessageModel
+      .find({
+        $or: [{ sender: userId }, { receiver: userId }],
+      })
+      .exec();
+
+    const userIds = new Set<string>();
+    messages.forEach((msg) => {
+      if (msg.sender !== userId) userIds.add(msg.sender);
+      if (msg.receiver !== userId) userIds.add(msg.receiver);
+    });
+
+    return Array.from(userIds);
+  }
 }
