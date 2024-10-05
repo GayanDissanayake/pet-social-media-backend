@@ -193,7 +193,7 @@ export class AuthService {
       to: user.email,
       subject: 'Email Verification',
       text: `Please verify your email by clicking on the following link: 
-             ${process.env.FRONTEND_URL}/verify?email=${user.email}&token=${token}`,
+             ${process.env.FRONTEND_URL}/auth/verify?email=${user.email}&token=${token}`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -258,7 +258,7 @@ export class AuthService {
       to: user.email,
       subject: 'Password Reset',
       text: `You requested a password reset. Please click on the following link to reset your password: 
-             ${process.env.FRONTEND_URL}/reset-password?token=${token}&email=${user.email}`,
+             ${process.env.FRONTEND_URL}/auth/reset-password?token=${token}&email=${user.email}`,
     };
 
     await transporter.sendMail(mailOptions);
