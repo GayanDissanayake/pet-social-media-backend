@@ -10,6 +10,7 @@ import { LikesModule } from './likes/likes.module';
 import { CommentsModule } from './comments/comments.module';
 import { ChatModule } from './chat/chat.module';
 import { EmailModule } from './email/email.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EmailModule } from './email/email.module';
     CommentsModule,
     ChatModule,
     EmailModule,
+    ContactModule,
     HealthModule,
   ],
 })
