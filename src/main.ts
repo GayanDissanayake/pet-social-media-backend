@@ -12,7 +12,7 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.enableCors({
-    origin: 'http://localhost:3000', // Replace with your frontend URL
+    origin: `${process.env.FRONTEND_URL}`, // Replace with your frontend URL
   });
   await app.listen(process.env.PORT || 3000);
 }
