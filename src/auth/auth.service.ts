@@ -58,6 +58,10 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException();
     }
+
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('Email not verified');
+    }
     const payload = { email: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -129,7 +133,7 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(userProfile.email);
     if (existingUser) {
       // Redirect to the login page if the user already exists
-      return { redirect: 'http://localhost:3000/auth/login' };
+      return { redirect: `${process.env.FRONEND_URL}/auth/login` };
     }
 
     // Find or create the user in the database

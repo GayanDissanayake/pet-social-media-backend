@@ -81,7 +81,7 @@ export class AuthController {
       });
 
       res.redirect(
-        `http://localhost:3000/facebook?token=${token}&name=${user.name}&email=${user.email}`,
+        `${process.env.FRONTEND_URL}/facebook?token=${token}&name=${user.name}&email=${user.email}`,
       );
     } catch (error) {
       return res
