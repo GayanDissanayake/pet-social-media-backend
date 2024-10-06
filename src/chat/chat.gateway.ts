@@ -67,9 +67,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           message: payload.message,
           timestamp: savedMessage.timestamp,
         });
-        console.log(
-          `Message received by ${payload.receiverId}: ${payload.message}`,
-        );
       } else {
         console.warn(`Receiver ${payload.receiverId} is not connected.`);
       }
