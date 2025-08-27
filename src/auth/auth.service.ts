@@ -11,9 +11,13 @@ import { CreateUserDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
-import * as nodemailer from 'nodemailer';
+import { EmailService } from '../email/email.service';
 import { User } from 'src/users/schemas/user.schema';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import {
+  emailVerificationTemplate,
+  passwordResetTemplate,
+} from '../email/templates';
 
 // import { UserDocument } from '../users/schemas/user.schema';
 
@@ -39,6 +43,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -184,23 +189,18 @@ export class AuthService {
   }
 
   private async sendVerificationEmail(user: User, token: string) {
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const verificationUrl = `${process.env.FRONTEND_URL}/auth/verify?email=${user.email}&token=${token}`;
 
-    const mailOptions = {
-      from: 'gayansasankadissanayake@gmail.com',
-      to: user.email,
-      subject: 'Email Verification',
-      text: `Please verify your email by clicking on the following link: 
-             ${process.env.FRONTEND_URL}/auth/verify?email=${user.email}&token=${token}`,
+    const templateData = {
+      userName: user.name,
+      verificationUrl,
     };
 
-    await transporter.sendMail(mailOptions);
+    const subject = emailVerificationTemplate.subject;
+    const text = emailVerificationTemplate.generateText(templateData);
+    const html = emailVerificationTemplate.generateHtml(templateData);
+
+    await this.emailService.sendEmail(user.email, subject, text, html);
   }
 
   async verifyEmail(
@@ -249,23 +249,18 @@ export class AuthService {
   }
 
   private async sendPasswordResetEmail(user: User, token: string) {
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}&email=${user.email}`;
 
-    const mailOptions = {
-      from: 'gayansasankadissanayake@gmail.com',
-      to: user.email,
-      subject: 'Password Reset',
-      text: `You requested a password reset. Please click on the following link to reset your password: 
-             ${process.env.FRONTEND_URL}/auth/reset-password?token=${token}&email=${user.email}`,
+    const templateData = {
+      userName: user.name,
+      resetUrl,
     };
 
-    await transporter.sendMail(mailOptions);
+    const subject = passwordResetTemplate.subject;
+    const text = passwordResetTemplate.generateText(templateData);
+    const html = passwordResetTemplate.generateHtml(templateData);
+
+    await this.emailService.sendEmail(user.email, subject, text, html);
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
